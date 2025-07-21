@@ -3,9 +3,11 @@ import { Sparkles, BookOpen, Wand2, Volume2, Brain, Accessibility } from "lucide
 import { MagicalCard } from "@/components/MagicalCard";
 import { MagicalButton } from "@/components/MagicalButton";
 import { UploadZone } from "@/components/UploadZone";
-import { MagicalProgress } from "@/components/MagicalProgress";
 import { Navigation } from "@/components/Navigation";
 import { DocumentProcessor } from "@/components/DocumentProcessor";
+import { SettingsPage } from "@/components/SettingsPage";
+import { DashboardPage } from "@/components/DashboardPage";
+import { SettingsProvider } from "@/hooks/useSettings";
 import heroImage from "@/assets/hero-library.jpg";
 import wandImage from "@/assets/magic-wand.png";
 
@@ -82,44 +84,19 @@ const Index = () => {
       );
     }
 
-    if (currentPage === "profile") {
-      return (
-        <div className="pt-20 px-4 min-h-screen">
-          <div className="max-w-4xl mx-auto py-16 text-center">
-            <h2 className="text-3xl font-magical text-magical mb-4">Profile</h2>
-            <p className="text-muted-foreground">Your magical profile settings will appear here.</p>
-          </div>
-        </div>
-      );
-    }
-
     if (currentPage === "settings") {
-      return (
-        <div className="pt-20 px-4 min-h-screen">
-          <div className="max-w-4xl mx-auto py-16 text-center">
-            <h2 className="text-3xl font-magical text-magical mb-4">Settings</h2>
-            <p className="text-muted-foreground">Magical settings and preferences will appear here.</p>
-          </div>
-        </div>
-      );
+      return <SettingsPage />;
     }
 
     if (currentPage === "dashboard") {
-      return (
-        <div className="pt-20 px-4 min-h-screen">
-          <div className="max-w-4xl mx-auto py-16 text-center">
-            <h2 className="text-3xl font-magical text-magical mb-4">Dashboard</h2>
-            <p className="text-muted-foreground">Your magical reading history and saved documents will appear here.</p>
-          </div>
-        </div>
-      );
+      return <DashboardPage />;
     }
 
     // Default home page
     return (
       <>
         {/* Hero Section */}
-        <section className="relative py-20 px-4 overflow-hidden">
+        <section className="relative min-h-screen flex items-center justify-center py-20 px-4 overflow-hidden">
         <div 
           className="absolute inset-0 opacity-30"
           style={{
@@ -130,7 +107,7 @@ const Index = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background" />
         
-        <div className="relative max-w-6xl mx-auto text-center space-y-8">
+        <div className="relative max-w-6xl mx-auto text-center space-y-8 w-full">
           <div className="flex justify-center mb-6">
             <img 
               src={wandImage} 
@@ -139,22 +116,22 @@ const Index = () => {
             />
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-magical text-magical leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-magical text-magical leading-tight">
             BookWand
-            <Sparkles className="inline-block w-12 h-12 ml-4 text-primary animate-float-sparkle" />
+            <Sparkles className="inline-block w-8 sm:w-12 h-8 sm:h-12 ml-2 sm:ml-4 text-primary animate-float-sparkle" />
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-body">
+          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-body px-4">
             Transform your reading experience with magical AI-powered summaries, 
             character voices, and accessibility features that make every document enchanting.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <MagicalButton size="lg" className="min-w-[200px]" onClick={handleStartMagic}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
+            <MagicalButton size="lg" className="w-full sm:w-auto min-w-[200px]" onClick={handleStartMagic}>
               <BookOpen className="w-5 h-5 mr-2" />
               Start Reading Magic
             </MagicalButton>
-            <MagicalButton variant="outline" size="lg">
+            <MagicalButton variant="outline" size="lg" className="w-full sm:w-auto">
               <Sparkles className="w-5 h-5 mr-2" />
               Learn More
             </MagicalButton>
@@ -215,10 +192,12 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-      {renderPageContent()}
-    </div>
+    <SettingsProvider>
+      <div className="min-h-screen w-full overflow-x-hidden">
+        <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+        {renderPageContent()}
+      </div>
+    </SettingsProvider>
   );
 };
 

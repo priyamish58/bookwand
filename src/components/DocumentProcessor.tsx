@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { FileText, Sparkles, Volume2, Brain } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, Sparkles, Volume2, Brain, ArrowLeft, Scroll } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { MagicalButton } from "./MagicalButton";
 import { MagicalProgress } from "./MagicalProgress";
+import { parseFile, getFilePreview } from "@/utils/fileParser";
+import { useSettings } from "@/hooks/useSettings";
 
 interface DocumentProcessorProps {
   file: File;
@@ -12,10 +14,32 @@ interface DocumentProcessorProps {
 export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   const [documentName, setDocumentName] = useState(file.name.replace(/\.[^/.]+$/, ""));
   const [documentText, setDocumentText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [summary, setSummary] = useState("");
-  const [currentStep, setCurrentStep] = useState<"input" | "processing" | "results">("input");
+  const [currentStep, setCurrentStep] = useState<"loading" | "display" | "processing" | "results">("loading");
+  const { settings } = useSettings();
+
+  // Auto-parse file content on component mount
+  useEffect(() => {
+    const loadFileContent = async () => {
+      try {
+        setIsLoading(true);
+        const content = await parseFile(file);
+        setDocumentText(content);
+        setCurrentStep("display");
+      } catch (error) {
+        console.error("Error parsing file:", error);
+        setDocumentText("Error loading file content. Please try a different file.");
+        setCurrentStep("display");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFileContent();
+  }, [file]);
 
   const handleSummarize = async () => {
     setCurrentStep("processing");
@@ -48,6 +72,30 @@ Ready for your next magical adventure in learning!`);
     // TODO: Implement reading mode
     console.log("Reading document:", documentName);
   };
+
+  if (currentStep === "loading") {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <MagicalCard variant="parchment" className="p-8 text-center space-y-6">
+          <div className="space-y-4">
+            <Scroll className="w-16 h-16 text-primary mx-auto animate-spin" />
+            <h3 className="text-2xl font-magical text-magical">
+              Deciphering Your Magical Document
+            </h3>
+            <p className="text-muted-foreground">
+              Extracting content from: {file.name}
+            </p>
+            
+            <MagicalProgress 
+              value={75}
+              label="Reading the ancient texts..."
+              className="max-w-md mx-auto"
+            />
+          </div>
+        </MagicalCard>
+      </div>
+    );
+  }
 
   if (currentStep === "processing") {
     return (
@@ -134,65 +182,83 @@ Ready for your next magical adventure in learning!`);
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-magical text-magical">Begin Your Magical Journey</h2>
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-magical text-magical">{documentName}</h2>
+          <p className="text-muted-foreground">File: {file.name}</p>
+        </div>
         <MagicalButton variant="outline" onClick={onBack}>
-          Choose Different Document
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Upload
         </MagicalButton>
       </div>
 
-      <MagicalCard variant="magical" className="p-8 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Document Name
-            </label>
-            <input
-              type="text"
-              value={documentName}
-              onChange={(e) => setDocumentName(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
-              placeholder="Enter a magical name for your document..."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Document Text
-            </label>
-            <textarea
-              value={documentText}
-              onChange={(e) => setDocumentText(e.target.value)}
-              rows={8}
-              className="w-full px-4 py-3 rounded-lg bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors resize-none"
-              placeholder="Paste your document text here, or we'll extract it from your uploaded file..."
-            />
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4">
-            <MagicalButton 
-              variant="magical" 
-              size="lg" 
-              className="flex-1"
-              onClick={handleSummarize}
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Document Content */}
+        <div className="lg:col-span-2">
+          <MagicalCard variant="parchment" className="p-6 space-y-4">
+            <div className="flex items-center space-x-2">
+              <Scroll className="w-6 h-6 text-primary" />
+              <h3 className="text-xl font-magical text-foreground">Document Content</h3>
+            </div>
+            <div 
+              className={`
+                bg-background/50 p-4 rounded-lg max-h-96 overflow-y-auto
+                ${settings.isDyslexiaMode ? 'font-dyslexic' : 'font-body'}
+                ${settings.isADHDFocus ? 'text-highlight' : ''}
+              `}
             >
-              <Brain className="w-5 h-5 mr-2" />
-              Summarize
-            </MagicalButton>
-            
-            <MagicalButton 
-              variant="outline" 
-              size="lg" 
-              className="flex-1"
-              onClick={handleReadDocument}
-            >
-              <FileText className="w-5 h-5 mr-2" />
-              Read The Document
-            </MagicalButton>
-          </div>
+              <pre className="whitespace-pre-wrap text-sm text-foreground leading-relaxed">
+                {documentText}
+              </pre>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {documentText.length} characters • Scroll to read more
+            </div>
+          </MagicalCard>
         </div>
-      </MagicalCard>
+
+        {/* Actions Panel */}
+        <div className="space-y-4">
+          <MagicalCard variant="magical" className="p-6 space-y-4">
+            <div className="flex items-center space-x-2">
+              <Brain className="w-6 h-6 text-primary" />
+              <h3 className="text-lg font-magical text-foreground">AI Magic</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <MagicalButton 
+                variant="magical" 
+                className="w-full"
+                onClick={handleSummarize}
+              >
+                <Brain className="w-4 h-4 mr-2" />
+                Summarize with AI
+              </MagicalButton>
+              
+              <MagicalButton variant="outline" className="w-full">
+                <Volume2 className="w-4 h-4 mr-2" />
+                Listen ({settings.selectedVoice})
+              </MagicalButton>
+              
+              <MagicalButton variant="scroll" className="w-full">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Word Wizard
+              </MagicalButton>
+            </div>
+          </MagicalCard>
+
+          <MagicalCard variant="scroll" className="p-4">
+            <h4 className="font-semibold text-foreground mb-2">Quick Actions</h4>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <p>• Voice Commands: "Lumos" for dark mode</p>
+              <p>• Click any word for AI definitions</p>
+              <p>• Generate quizzes after summarizing</p>
+            </div>
+          </MagicalCard>
+        </div>
+      </div>
     </div>
   );
 }
