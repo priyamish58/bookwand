@@ -10,55 +10,44 @@ import { DashboardPage } from "@/components/DashboardPage";
 import { SettingsProvider } from "@/hooks/useSettings";
 import heroImage from "@/assets/hero-library.jpg";
 import wandImage from "@/assets/magic-wand.png";
-
 const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [currentPage, setCurrentPage] = useState("home");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-
   const handleFileUpload = async (file: File) => {
     setUploadedFile(file);
     setCurrentPage("process");
   };
-
   const handleBackToUpload = () => {
     setUploadedFile(null);
     setCurrentPage("home");
   };
-
   const handleStartMagic = () => {
     setCurrentPage("upload");
   };
-
-  const features = [
-    {
-      icon: Brain,
-      title: "AI Summaries",
-      description: "Transform any document into magical summaries with GPT-powered intelligence"
-    },
-    {
-      icon: Volume2,
-      title: "Character Voices",
-      description: "Listen to your documents narrated by Snape, Hermione, and other magical voices"
-    },
-    {
-      icon: Accessibility,
-      title: "Accessibility First",
-      description: "Dyslexia-friendly fonts, voice navigation, and visual impairment support"
-    },
-    {
-      icon: Wand2,
-      title: "Spell Commands",
-      description: "Navigate with voice commands like 'Lumos' for dark mode and 'Accio Chapter 3'"
-    }
-  ];
+  const features = [{
+    icon: Brain,
+    title: "AI Summaries",
+    description: "Transform any document into magical summaries with GPT-powered intelligence"
+  }, {
+    icon: Volume2,
+    title: "Character Voices",
+    description: "Listen to your documents narrated by Snape, Hermione, and other magical voices"
+  }, {
+    icon: Accessibility,
+    title: "Accessibility First",
+    description: "Dyslexia-friendly fonts, voice navigation, and visual impairment support"
+  }, {
+    icon: Wand2,
+    title: "Spell Commands",
+    description: "Navigate with voice commands like 'Lumos' for dark mode and 'Accio Chapter 3'"
+  }];
 
   // Render current page content
   const renderPageContent = () => {
-    if (currentPage === "upload" || (currentPage === "home" && uploadedFile)) {
-      return (
-        <div className="pt-20 px-4 min-h-screen">
+    if (currentPage === "upload" || currentPage === "home" && uploadedFile) {
+      return <div className="pt-20 px-4 min-h-screen">
           <div className="max-w-4xl mx-auto py-16">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-magical text-magical mb-4">
@@ -70,50 +59,36 @@ const Index = () => {
             </div>
             <UploadZone onFileUpload={handleFileUpload} />
           </div>
-        </div>
-      );
+        </div>;
     }
-
     if (currentPage === "process" && uploadedFile) {
-      return (
-        <div className="pt-20 px-4 min-h-screen">
+      return <div className="pt-20 px-4 min-h-screen">
           <div className="py-16">
             <DocumentProcessor file={uploadedFile} onBack={handleBackToUpload} />
           </div>
-        </div>
-      );
+        </div>;
     }
-
     if (currentPage === "settings") {
       return <SettingsPage />;
     }
-
     if (currentPage === "dashboard") {
       return <DashboardPage />;
     }
 
     // Default home page
-    return (
-      <>
+    return <>
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center py-20 px-4 overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `url(${heroImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }} />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background" />
         
         <div className="relative max-w-6xl mx-auto text-center space-y-8 w-full">
           <div className="flex justify-center mb-6">
-            <img 
-              src={wandImage} 
-              alt="Magic Wand" 
-              className="w-20 h-20 animate-gentle-bounce drop-shadow-glow"
-            />
+            <img src={wandImage} alt="Magic Wand" className="w-20 h-20 animate-gentle-bounce drop-shadow-glow" />
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-magical text-magical leading-tight">
@@ -131,10 +106,7 @@ const Index = () => {
               <BookOpen className="w-5 h-5 mr-2" />
               Start Reading Magic
             </MagicalButton>
-            <MagicalButton variant="outline" size="lg" className="w-full sm:w-auto">
-              <Sparkles className="w-5 h-5 mr-2" />
-              Learn More
-            </MagicalButton>
+            
           </div>
         </div>
         </section>
@@ -152,12 +124,7 @@ const Index = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <MagicalCard 
-                key={index}
-                variant="magical" 
-                className="p-6 text-center space-y-4 hover:scale-105 transition-transform duration-300"
-              >
+            {features.map((feature, index) => <MagicalCard key={index} variant="magical" className="p-6 text-center space-y-4 hover:scale-105 transition-transform duration-300">
                 <div className="flex justify-center">
                   <div className="p-3 rounded-full bg-primary/10">
                     <feature.icon className="w-8 h-8 text-primary" />
@@ -169,8 +136,7 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground">
                   {feature.description}
                 </p>
-              </MagicalCard>
-            ))}
+              </MagicalCard>)}
           </div>
         </div>
       </section>
@@ -187,18 +153,13 @@ const Index = () => {
           </p>
         </div>
       </footer>
-      </>
-    );
+      </>;
   };
-
-  return (
-    <SettingsProvider>
+  return <SettingsProvider>
       <div className="min-h-screen w-full overflow-x-hidden">
         <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
         {renderPageContent()}
       </div>
-    </SettingsProvider>
-  );
+    </SettingsProvider>;
 };
-
 export default Index;
