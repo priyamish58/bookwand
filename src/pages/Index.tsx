@@ -4,27 +4,29 @@ import { MagicalCard } from "@/components/MagicalCard";
 import { MagicalButton } from "@/components/MagicalButton";
 import { UploadZone } from "@/components/UploadZone";
 import { MagicalProgress } from "@/components/MagicalProgress";
+import { Navigation } from "@/components/Navigation";
+import { DocumentProcessor } from "@/components/DocumentProcessor";
 import heroImage from "@/assets/hero-library.jpg";
 import wandImage from "@/assets/magic-wand.png";
 
 const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [currentPage, setCurrentPage] = useState("home");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const handleFileUpload = async (file: File) => {
     setUploadedFile(file);
-    setIsProcessing(true);
-    setProgress(0);
+    setCurrentPage("process");
+  };
 
-    // Simulate magical processing
-    for (let i = 0; i <= 100; i += 5) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setProgress(i);
-    }
+  const handleBackToUpload = () => {
+    setUploadedFile(null);
+    setCurrentPage("home");
+  };
 
-    setIsProcessing(false);
-    // TODO: Navigate to reading page or show summary
+  const handleStartMagic = () => {
+    setCurrentPage("upload");
   };
 
   const features = [
@@ -50,10 +52,74 @@ const Index = () => {
     }
   ];
 
-  return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 overflow-hidden">
+  // Render current page content
+  const renderPageContent = () => {
+    if (currentPage === "upload" || (currentPage === "home" && uploadedFile)) {
+      return (
+        <div className="pt-20 px-4 min-h-screen">
+          <div className="max-w-4xl mx-auto py-16">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-magical text-magical mb-4">
+                Begin Your Magical Journey
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Upload your document and watch as BookWand transforms it into an enchanted reading experience
+              </p>
+            </div>
+            <UploadZone onFileUpload={handleFileUpload} />
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === "process" && uploadedFile) {
+      return (
+        <div className="pt-20 px-4 min-h-screen">
+          <div className="py-16">
+            <DocumentProcessor file={uploadedFile} onBack={handleBackToUpload} />
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === "profile") {
+      return (
+        <div className="pt-20 px-4 min-h-screen">
+          <div className="max-w-4xl mx-auto py-16 text-center">
+            <h2 className="text-3xl font-magical text-magical mb-4">Profile</h2>
+            <p className="text-muted-foreground">Your magical profile settings will appear here.</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === "settings") {
+      return (
+        <div className="pt-20 px-4 min-h-screen">
+          <div className="max-w-4xl mx-auto py-16 text-center">
+            <h2 className="text-3xl font-magical text-magical mb-4">Settings</h2>
+            <p className="text-muted-foreground">Magical settings and preferences will appear here.</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentPage === "dashboard") {
+      return (
+        <div className="pt-20 px-4 min-h-screen">
+          <div className="max-w-4xl mx-auto py-16 text-center">
+            <h2 className="text-3xl font-magical text-magical mb-4">Dashboard</h2>
+            <p className="text-muted-foreground">Your magical reading history and saved documents will appear here.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Default home page
+    return (
+      <>
+        {/* Hero Section */}
+        <section className="relative py-20 px-4 overflow-hidden">
         <div 
           className="absolute inset-0 opacity-30"
           style={{
@@ -84,7 +150,7 @@ const Index = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <MagicalButton size="lg" className="min-w-[200px]">
+            <MagicalButton size="lg" className="min-w-[200px]" onClick={handleStartMagic}>
               <BookOpen className="w-5 h-5 mr-2" />
               Start Reading Magic
             </MagicalButton>
@@ -94,53 +160,7 @@ const Index = () => {
             </MagicalButton>
           </div>
         </div>
-      </section>
-
-      {/* Upload Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-magical text-magical mb-4">
-              Begin Your Magical Journey
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Upload your document and watch as BookWand transforms it into an enchanted reading experience
-            </p>
-          </div>
-
-          {!uploadedFile ? (
-            <UploadZone onFileUpload={handleFileUpload} />
-          ) : (
-            <MagicalCard variant="parchment" className="p-8 text-center space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-2xl font-magical text-magical">
-                  Processing Your Magical Tome
-                </h3>
-                <p className="text-muted-foreground">
-                  File: {uploadedFile.name}
-                </p>
-                
-                {isProcessing && (
-                  <MagicalProgress 
-                    value={progress}
-                    label="Casting reading spells..."
-                    className="max-w-md mx-auto"
-                  />
-                )}
-                
-                {!isProcessing && (
-                  <div className="space-y-4">
-                    <p className="text-primary font-semibold">✨ Ready for magical reading!</p>
-                    <MagicalButton size="lg">
-                      Enter the Reading Chamber
-                    </MagicalButton>
-                  </div>
-                )}
-              </div>
-            </MagicalCard>
-          )}
-        </div>
-      </section>
+        </section>
 
       {/* Features Section */}
       <section className="py-16 px-4 bg-card/50">
@@ -190,6 +210,14 @@ const Index = () => {
           </p>
         </div>
       </footer>
+      </>
+    );
+  };
+
+  return (
+    <div className="min-h-screen">
+      <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+      {renderPageContent()}
     </div>
   );
 };
