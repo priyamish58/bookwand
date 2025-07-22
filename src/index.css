@@ -6,57 +6,57 @@
 
 @layer base {
   :root {
-    /* Magical backgrounds */
-    --background: 35 25% 8%;  /* Deep magical brown-black */
-    --foreground: 45 30% 92%; /* Warm parchment white */
+    /* Night Mode - Light Blue Magical Theme */
+    --background: 210 40% 85%;  /* Light blue background */
+    --foreground: 220 15% 25%;  /* Dark blue-grey text */
 
     /* Cards and surfaces */
-    --card: 35 20% 12%;       /* Darker magical brown */
-    --card-foreground: 45 25% 88%;
+    --card: 210 40% 88%;        /* Lighter blue card */
+    --card-foreground: 220 15% 25%;
 
-    --popover: 35 15% 10%;
-    --popover-foreground: 45 25% 88%;
+    --popover: 210 40% 88%;
+    --popover-foreground: 220 15% 25%;
 
-    /* Primary magical golden colors */
-    --primary: 43 95% 65%;     /* Magical golden glow */
-    --primary-foreground: 35 25% 8%;
-    --primary-glow: 43 100% 75%; /* Brighter golden glow */
+    /* Primary ocean blue colors */
+    --primary: 200 100% 36%;    /* Ocean blue */
+    --primary-foreground: 210 40% 98%;  /* Soft white */
+    --primary-glow: 200 100% 50%;  /* Brighter ocean blue */
 
-    /* Secondary warm browns */
-    --secondary: 35 25% 20%;   /* Rich brown */
-    --secondary-foreground: 45 25% 85%;
+    /* Secondary blue tones */
+    --secondary: 210 25% 75%;   /* Muted blue */
+    --secondary-foreground: 220 15% 25%;
 
-    /* Muted parchment tones */
-    --muted: 40 15% 15%;       /* Muted brown */
-    --muted-foreground: 45 15% 65%;
+    /* Muted blue tones */
+    --muted: 210 20% 80%;       /* Light muted blue */
+    --muted-foreground: 220 15% 45%;
 
-    /* Accent warm amber */
-    --accent: 38 85% 55%;      /* Warm amber accent */
-    --accent-foreground: 35 25% 8%;
+    /* Accent navy blue */
+    --accent: 210 100% 25%;     /* Navy blue accent */
+    --accent-foreground: 210 40% 98%;
 
     /* Magical error states */
-    --destructive: 0 85% 45%;  /* Deep magical red */
-    --destructive-foreground: 45 25% 88%;
+    --destructive: 0 85% 45%;   /* Red for errors */
+    --destructive-foreground: 210 40% 98%;
 
     /* Borders and inputs */
-    --border: 35 25% 25%;      /* Subtle brown border */
-    --input: 35 20% 18%;       /* Input background */
-    --ring: 43 95% 65%;        /* Golden focus ring */
+    --border: 210 25% 75%;      /* Blue border */
+    --input: 210 25% 75%;       /* Input background */
+    --ring: 200 100% 36%;       /* Ocean blue focus ring */
 
     /* Magical effects */
-    --magical-sparkle: 43 100% 80%;
-    --scroll-bg: 45 35% 85%;   /* Parchment scroll background */
-    --scroll-border: 35 45% 45%; /* Scroll border */
+    --magical-sparkle: 200 100% 50%;  /* Bright blue sparkle */
+    --scroll-bg: 210 40% 88%;   /* Light blue scroll background */
+    --scroll-border: 200 100% 36%; /* Ocean blue border */
     
-    /* Gradients */
-    --gradient-magical: linear-gradient(135deg, hsl(43 95% 65%), hsl(38 85% 55%), hsl(35 65% 45%));
-    --gradient-background: linear-gradient(180deg, hsl(35 25% 8%), hsl(35 20% 12%));
-    --gradient-card: linear-gradient(145deg, hsl(35 20% 12%), hsl(35 15% 10%));
+    /* Gradients - Moonlight theme */
+    --gradient-magical: linear-gradient(135deg, hsl(200 100% 36%), hsl(200 100% 50%), hsl(210 100% 25%));
+    --gradient-background: linear-gradient(180deg, hsl(210 40% 85%), hsl(200 50% 90%));
+    --gradient-card: linear-gradient(145deg, hsl(210 40% 88%), hsl(210 30% 92%));
     
-    /* Shadows with magical glow */
-    --shadow-magical: 0 4px 20px hsl(43 95% 65% / 0.3);
-    --shadow-card: 0 8px 32px hsl(35 25% 5% / 0.4);
-    --shadow-glow: 0 0 30px hsl(43 100% 75% / 0.5);
+    /* Shadows with blue glow */
+    --shadow-magical: 0 4px 20px hsl(200 100% 36% / 0.3);
+    --shadow-card: 0 8px 32px hsl(210 40% 85% / 0.4);
+    --shadow-glow: 0 0 30px hsl(200 100% 50% / 0.4);
 
     /* Animation values */
     --transition-magical: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -64,60 +64,72 @@
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar - Navy theme */
+    --sidebar-background: 210 100% 25%;  /* Navy blue */
+    --sidebar-foreground: 210 40% 98%;   /* Soft white */
+    --sidebar-primary: 200 100% 50%;     /* Bright ocean blue */
+    --sidebar-primary-foreground: 210 100% 25%;
+    --sidebar-accent: 210 25% 75%;       /* Muted blue */
+    --sidebar-accent-foreground: 220 15% 25%;
+    --sidebar-border: 210 25% 75%;
+    --sidebar-ring: 200 100% 36%;
   }
 
   .light {
-    /* Light mode: Warm parchment theme */
-    --background: 45 40% 95%;  /* Light parchment */
-    --foreground: 35 25% 15%;  /* Dark brown text */
+    /* Daylight Mode - Beige & Gold Magical Theme */
+    --background: 60 25% 96%;   /* Soft beige background */
+    --foreground: 30 15% 20%;   /* Deep charcoal text */
 
-    --card: 45 35% 92%;
-    --card-foreground: 35 25% 15%;
+    --card: 45 40% 94%;         /* Warm beige card */
+    --card-foreground: 30 15% 20%;
 
-    --popover: 45 35% 92%;
-    --popover-foreground: 35 25% 15%;
+    --popover: 45 40% 94%;
+    --popover-foreground: 30 15% 20%;
 
-    --primary: 43 85% 45%;     /* Darker golden for light mode */
-    --primary-foreground: 45 40% 95%;
+    --primary: 51 100% 50%;     /* Elegant gold */
+    --primary-foreground: 30 25% 15%;  /* Rich brown text */
+    --primary-glow: 50 100% 60%;   /* Soft metallic gold */
 
-    --secondary: 40 25% 85%;   /* Light brown */
-    --secondary-foreground: 35 25% 15%;
+    --secondary: 30 25% 55%;    /* Muted brown */
+    --secondary-foreground: 60 25% 96%;
 
-    --muted: 40 20% 88%;
-    --muted-foreground: 35 25% 45%;
+    --muted: 45 20% 88%;        /* Light beige */
+    --muted-foreground: 30 15% 40%;
 
-    --accent: 38 75% 45%;      /* Darker amber */
-    --accent-foreground: 45 40% 95%;
+    --accent: 51 100% 50%;      /* Golden accent */
+    --accent-foreground: 30 25% 15%;
 
     --destructive: 0 75% 45%;
-    --destructive-foreground: 45 40% 95%;
+    --destructive-foreground: 60 25% 96%;
 
-    --border: 35 25% 75%;
-    --input: 45 35% 88%;
-    --ring: 43 85% 45%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 30 25% 75%;       /* Brown border */
+    --input: 45 30% 90%;        /* Light beige input */
+    --ring: 51 100% 50%;        /* Golden focus ring */
+
+    /* Magical effects - Golden theme */
+    --magical-sparkle: 50 100% 60%;  /* Soft gold sparkle */
+    --scroll-bg: 45 40% 94%;    /* Warm beige scroll */
+    --scroll-border: 30 25% 55%; /* Brown border */
+    
+    /* Gradients - Beige to gold shimmer */
+    --gradient-magical: linear-gradient(135deg, hsl(51 100% 50%), hsl(50 100% 60%), hsl(40 90% 45%));
+    --gradient-background: linear-gradient(180deg, hsl(60 25% 96%), hsl(50 30% 92%));
+    --gradient-card: linear-gradient(145deg, hsl(45 40% 94%), hsl(50 35% 90%));
+    
+    /* Shadows with golden glow */
+    --shadow-magical: 0 4px 20px hsl(51 100% 50% / 0.25);
+    --shadow-card: 0 8px 32px hsl(30 25% 75% / 0.3);
+    --shadow-glow: 0 0 30px hsl(51 100% 50% / 0.3);
+
+    /* Sidebar - Warm brown theme */
+    --sidebar-background: 45 40% 94%;   /* Warm beige */
+    --sidebar-foreground: 30 15% 20%;   /* Dark text */
+    --sidebar-primary: 51 100% 50%;     /* Gold */
+    --sidebar-primary-foreground: 30 25% 15%;
+    --sidebar-accent: 45 20% 88%;       /* Light beige */
+    --sidebar-accent-foreground: 30 15% 20%;
+    --sidebar-border: 30 25% 75%;       /* Brown border */
+    --sidebar-ring: 51 100% 50%;        /* Golden ring */
   }
 }
 
