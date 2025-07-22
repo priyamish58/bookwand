@@ -7,6 +7,7 @@ import { Navigation } from "@/components/Navigation";
 import { DocumentProcessor } from "@/components/DocumentProcessor";
 import { SettingsPage } from "@/components/SettingsPage";
 import { DashboardPage } from "@/components/DashboardPage";
+import { ProfilePage } from "@/components/ProfilePage";
 import { SettingsProvider } from "@/hooks/useSettings";
 import heroImage from "@/assets/hero-library.jpg";
 import wandImage from "@/assets/magic-wand.png";
@@ -74,6 +75,9 @@ const Index = () => {
     if (currentPage === "dashboard") {
       return <DashboardPage />;
     }
+    if (currentPage === "profile") {
+      return <ProfilePage onNavigate={setCurrentPage} />;
+    }
 
     // Default home page
     return <>
@@ -88,12 +92,11 @@ const Index = () => {
         
         <div className="relative max-w-6xl mx-auto text-center space-y-8 w-full">
           <div className="flex justify-center mb-6">
-            <img src={wandImage} alt="Magic Wand" className="w-20 h-20 animate-gentle-bounce drop-shadow-glow" />
+            <Wand2 className="w-20 h-20 text-primary animate-gentle-bounce drop-shadow-glow" />
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-magical text-magical leading-tight">
             BookWand
-            <Sparkles className="inline-block w-8 sm:w-12 h-8 sm:h-12 ml-2 sm:ml-4 text-primary animate-float-sparkle" />
           </h1>
           
           <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-body px-4">

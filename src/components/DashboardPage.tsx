@@ -20,56 +20,9 @@ interface DictionaryEntry {
   documentSource: string;
 }
 
-const mockDocuments: Document[] = [
-  {
-    id: '1',
-    title: 'Introduction to Magical Theory',
-    uploadDate: '2024-01-15',
-    size: '2.4 MB',
-    type: 'pdf',
-    isBookmarked: true
-  },
-  {
-    id: '2',
-    title: 'Advanced Spellcrafting Techniques',
-    uploadDate: '2024-01-12',
-    size: '1.8 MB',
-    type: 'epub',
-    isBookmarked: false
-  },
-  {
-    id: '3',
-    title: 'Herbology Field Notes',
-    uploadDate: '2024-01-10',
-    size: '645 KB',
-    type: 'txt',
-    isBookmarked: true
-  }
-];
-
-const mockDictionary: DictionaryEntry[] = [
-  {
-    id: '1',
-    word: 'Transfiguration',
-    definition: 'The magical art of changing the form or appearance of objects and beings.',
-    searchDate: '2024-01-15',
-    documentSource: 'Introduction to Magical Theory'
-  },
-  {
-    id: '2',
-    word: 'Lumos',
-    definition: 'A charm that creates light from the tip of a wand, useful for illumination in dark places.',
-    searchDate: '2024-01-12',
-    documentSource: 'Advanced Spellcrafting Techniques'
-  },
-  {
-    id: '3',
-    word: 'Mandrake',
-    definition: 'A plant with magical restorative properties, known for its humanoid root and deadly cry.',
-    searchDate: '2024-01-10',
-    documentSource: 'Herbology Field Notes'
-  }
-];
+// Real user data should be empty initially - no mock data
+const mockDocuments: Document[] = [];
+const mockDictionary: DictionaryEntry[] = [];
 
 export function DashboardPage() {
   const [documents] = useState<Document[]>(mockDocuments);
@@ -137,55 +90,67 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-4">
-              {documents.map((doc) => (
-                <MagicalCard key={doc.id} variant="magical" className="p-6 hover:scale-[1.02] transition-transform duration-200">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-start space-x-4 flex-1">
-                      <div className="flex-shrink-0">
-                        {getFileIcon(doc.type)}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold text-foreground truncate">{doc.title}</h3>
-                          {doc.isBookmarked && (
-                            <Bookmark className="w-4 h-4 text-primary fill-current" />
-                          )}
+              {documents.length === 0 ? (
+                <MagicalCard variant="magical" className="p-8 text-center">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground text-lg mb-2">
+                    Your magical library is empty
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Upload your first document to start building your enchanted collection
+                  </p>
+                </MagicalCard>
+              ) : (
+                documents.map((doc) => (
+                  <MagicalCard key={doc.id} variant="magical" className="p-6 hover:scale-[1.02] transition-transform duration-200">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-start space-x-4 flex-1">
+                        <div className="flex-shrink-0">
+                          {getFileIcon(doc.type)}
                         </div>
                         
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-3 h-3" />
-                            <span>{new Date(doc.uploadDate).toLocaleDateString()}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="font-semibold text-foreground truncate">{doc.title}</h3>
+                            {doc.isBookmarked && (
+                              <Bookmark className="w-4 h-4 text-primary fill-current" />
+                            )}
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <FileText className="w-3 h-3" />
-                            <span>{doc.size}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{doc.type.toUpperCase()}</span>
+                          
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>{new Date(doc.uploadDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <FileText className="w-3 h-3" />
+                              <span>{doc.size}</span>
+                            </div>
+                            <div className="flex items-center space-x-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{doc.type.toUpperCase()}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <MagicalButton variant="outline" size="sm">
-                        <Brain className="w-3 h-3 mr-1" />
-                        Summary
-                      </MagicalButton>
-                      <MagicalButton variant="outline" size="sm">
-                        <Volume2 className="w-3 h-3 mr-1" />
-                        Listen
-                      </MagicalButton>
-                      <MagicalButton variant="scroll" size="sm">
-                        Read
-                      </MagicalButton>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <MagicalButton variant="outline" size="sm">
+                          <Brain className="w-3 h-3 mr-1" />
+                          Summary
+                        </MagicalButton>
+                        <MagicalButton variant="outline" size="sm">
+                          <Volume2 className="w-3 h-3 mr-1" />
+                          Listen
+                        </MagicalButton>
+                        <MagicalButton variant="scroll" size="sm">
+                          Read
+                        </MagicalButton>
+                      </div>
                     </div>
-                  </div>
-                </MagicalCard>
-              ))}
+                  </MagicalCard>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -208,42 +173,56 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-4">
-              {filteredDictionary.map((entry) => (
-                <MagicalCard key={entry.id} variant="parchment" className="p-6">
-                  <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <h3 className="text-xl font-magical text-primary">{entry.word}</h3>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
-                        <span>{new Date(entry.searchDate).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-foreground leading-relaxed">{entry.definition}</p>
-                    
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <div className="text-sm text-muted-foreground">
-                        From: <span className="font-medium">{entry.documentSource}</span>
-                      </div>
-                      <MagicalButton variant="outline" size="sm">
-                        <Volume2 className="w-3 h-3 mr-1" />
-                        Pronounce
-                      </MagicalButton>
-                    </div>
-                  </div>
-                </MagicalCard>
-              ))}
-              
-              {filteredDictionary.length === 0 && searchTerm && (
+              {dictionary.length === 0 ? (
                 <MagicalCard variant="magical" className="p-8 text-center">
                   <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
-                    No words found matching "{searchTerm}"
+                  <p className="text-muted-foreground text-lg mb-2">
+                    Your magical dictionary is empty
                   </p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Try searching for a different term or add new words by reading documents
+                  <p className="text-sm text-muted-foreground">
+                    Words you look up while reading will appear here for future reference
                   </p>
                 </MagicalCard>
+              ) : (
+                <>
+                  {filteredDictionary.map((entry) => (
+                    <MagicalCard key={entry.id} variant="parchment" className="p-6">
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <h3 className="text-xl font-magical text-primary">{entry.word}</h3>
+                          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            <span>{new Date(entry.searchDate).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        
+                        <p className="text-foreground leading-relaxed">{entry.definition}</p>
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-border">
+                          <div className="text-sm text-muted-foreground">
+                            From: <span className="font-medium">{entry.documentSource}</span>
+                          </div>
+                          <MagicalButton variant="outline" size="sm">
+                            <Volume2 className="w-3 h-3 mr-1" />
+                            Pronounce
+                          </MagicalButton>
+                        </div>
+                      </div>
+                    </MagicalCard>
+                  ))}
+                  
+                  {filteredDictionary.length === 0 && searchTerm && (
+                    <MagicalCard variant="magical" className="p-8 text-center">
+                      <Brain className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">
+                        No words found matching "{searchTerm}"
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Try searching for a different term or add new words by reading documents
+                      </p>
+                    </MagicalCard>
+                  )}
+                </>
               )}
             </div>
           </div>

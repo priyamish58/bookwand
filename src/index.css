@@ -84,22 +84,22 @@
   .light {
     /* Light mode: Warm parchment theme */
     --background: 45 40% 95%;  /* Light parchment */
-    --foreground: 35 25% 15%;  /* Dark brown text */
+    --foreground: 35 45% 10%;  /* Darker brown text for better contrast */
 
     --card: 45 35% 92%;
-    --card-foreground: 35 25% 15%;
+    --card-foreground: 35 45% 10%;
 
     --popover: 45 35% 92%;
-    --popover-foreground: 35 25% 15%;
+    --popover-foreground: 35 45% 10%;
 
     --primary: 43 85% 45%;     /* Darker golden for light mode */
     --primary-foreground: 45 40% 95%;
 
     --secondary: 40 25% 85%;   /* Light brown */
-    --secondary-foreground: 35 25% 15%;
+    --secondary-foreground: 35 45% 10%;
 
     --muted: 40 20% 88%;
-    --muted-foreground: 35 25% 45%;
+    --muted-foreground: 35 35% 35%;
 
     --accent: 38 75% 45%;      /* Darker amber */
     --accent-foreground: 45 40% 95%;
@@ -145,14 +145,18 @@
     font-family: 'Crimson Text', 'Georgia', serif;
   }
 
-  /* ADHD Focus mode */
+  /* ADHD Focus mode - removed bouncy animation */
   .adhd-focus {
-    animation: breathing 4s ease-in-out infinite;
+    /* Focus mode styling without distracting animations */
   }
 
-  @keyframes breathing {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+  /* Word highlighting for ADHD focus mode */
+  .word-highlight {
+    background: linear-gradient(120deg, hsl(var(--primary) / 0.4) 0%, hsl(var(--primary) / 0.4) 100%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    border-radius: 2px;
+    transition: all 0.2s ease-in-out;
   }
 
   .text-highlight {
