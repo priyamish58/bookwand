@@ -91,13 +91,16 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background" />
         
         <div className="relative max-w-6xl mx-auto text-center space-y-8 w-full">
-          <div className="flex justify-center mb-6">
-            <Wand2 className="w-20 h-20 text-primary animate-gentle-bounce drop-shadow-glow" />
+          <div className="flex justify-center items-center gap-4 mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-magical text-magical leading-tight">
+              BookWand
+            </h1>
+            <img 
+              src="/lovable-uploads/505fae52-9316-4da7-9fa0-d5cab1632833.png" 
+              alt="Magic Wand" 
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 animate-gentle-bounce drop-shadow-glow" 
+            />
           </div>
-          
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-magical text-magical leading-tight">
-            BookWand
-          </h1>
           
           <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-body px-4">
             Transform your reading experience with magical AI-powered summaries, 
