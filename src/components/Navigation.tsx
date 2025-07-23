@@ -37,6 +37,14 @@ export function Navigation({ currentPage = "home", onNavigate }: NavigationProps
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
+          <MagicalButton 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleNavigate("upload")}
+            className="mr-4"
+          >
+            Upload Document
+          </MagicalButton>
           {menuItems.map((item) => (
             <button
               key={item.id}

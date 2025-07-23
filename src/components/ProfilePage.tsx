@@ -20,47 +20,9 @@ export function ProfilePage({ onNavigate }: ProfilePageProps) {
     joinDate: "2024-01-22"
   });
 
-  const handleCameraClick = async () => {
-    try {
-      // First try to access camera
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        
-        // Create video element to capture frame
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.play();
-        
-        video.onloadedmetadata = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          
-          setTimeout(() => {
-            if (ctx) {
-              ctx.drawImage(video, 0, 0);
-              const imageData = canvas.toDataURL('image/png');
-              setUser(prev => ({ ...prev, profilePicture: imageData }));
-              
-              // Stop camera stream
-              stream.getTracks().forEach(track => track.stop());
-              
-              toast({
-                title: "Profile picture captured!",
-                description: "Your new profile picture has been saved.",
-              });
-            }
-          }, 3000); // Give user 3 seconds to pose
-        };
-      } else {
-        // Fallback to file input
-        fileInputRef.current?.click();
-      }
-    } catch (error) {
-      // If camera access denied, fallback to file input
-      fileInputRef.current?.click();
-    }
+  const handleCameraClick = () => {
+    // Direct file selection instead of camera access
+    fileInputRef.current?.click();
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
