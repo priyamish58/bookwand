@@ -14,8 +14,8 @@ const MagicalButton = forwardRef<HTMLButtonElement, MagicalButtonProps>(
     
     const variants = {
       magical: "btn-magical hover:transform hover:scale-105",
-      scroll: "bg-magical-scroll-bg border-2 border-magical-scroll-border text-foreground hover:bg-accent hover:text-accent-foreground",
-      outline: "border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+      scroll: "bg-magical-scroll-bg border-2 border-magical-scroll-border text-foreground magical-glow-hover",
+      outline: "border-2 border-primary text-primary magical-glow-hover"
     };
 
     const sizes = {

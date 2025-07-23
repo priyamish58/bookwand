@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Calendar, BookOpen, Bookmark, Search, Clock, FileText, Volume2, Brain } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { MagicalButton } from "./MagicalButton";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 
 interface Document {
   id: string;
@@ -21,11 +22,10 @@ interface DictionaryEntry {
 }
 
 // Real user data should be empty initially - no mock data
-const mockDocuments: Document[] = [];
 const mockDictionary: DictionaryEntry[] = [];
 
 export function DashboardPage() {
-  const [documents] = useState<Document[]>(mockDocuments);
+  const { documents, documentCount } = useDocumentUpload();
   const [dictionary] = useState<DictionaryEntry[]>(mockDictionary);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<'documents' | 'dictionary'>('documents');
@@ -36,12 +36,10 @@ export function DashboardPage() {
   );
 
   const getFileIcon = (type: string) => {
-    switch (type) {
-      case 'pdf': return <FileText className="w-5 h-5 text-red-500" />;
-      case 'epub': return <BookOpen className="w-5 h-5 text-blue-500" />;
-      case 'txt': return <FileText className="w-5 h-5 text-green-500" />;
-      default: return <FileText className="w-5 h-5 text-muted-foreground" />;
-    }
+    if (type.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />;
+    if (type.includes('epub')) return <BookOpen className="w-5 h-5 text-blue-500" />;
+    if (type.includes('text')) return <FileText className="w-5 h-5 text-green-500" />;
+    return <FileText className="w-5 h-5 text-muted-foreground" />;
   };
 
   return (
@@ -57,6 +55,11 @@ export function DashboardPage() {
           <p className="text-lg text-muted-foreground">
             Access your reading history, summaries, and personal dictionary
           </p>
+          <div className="mt-4">
+            <span className="text-lg font-magical text-primary">
+              {documentCount} Documents Uploaded
+            </span>
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -120,15 +123,15 @@ export function DashboardPage() {
                           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-3 h-3" />
-                              <span>{new Date(doc.uploadDate).toLocaleDateString()}</span>
+                              <span>{doc.uploadDate.toLocaleDateString()}</span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <FileText className="w-3 h-3" />
-                              <span>{doc.size}</span>
+                              <span>{(doc.size / 1024).toFixed(1)} KB</span>
                             </div>
                             <div className="flex items-center space-x-1">
                               <Clock className="w-3 h-3" />
-                              <span>{doc.type.toUpperCase()}</span>
+                              <span>{doc.type.includes('pdf') ? 'PDF' : doc.type.includes('epub') ? 'EPUB' : 'TXT'}</span>
                             </div>
                           </div>
                         </div>

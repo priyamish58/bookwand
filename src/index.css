@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -141,6 +143,11 @@
     font-family: 'Cinzel', 'Georgia', serif;
   }
 
+  .font-harry-potter {
+    font-family: 'Cinzel Decorative', 'Cinzel', 'Georgia', serif;
+    font-weight: 700;
+  }
+
   .font-body {
     font-family: 'Crimson Text', 'Georgia', serif;
   }
@@ -258,6 +265,13 @@
   .btn-magical:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-glow);
+  }
+
+  /* Magical glow hover effect for all buttons */
+  .magical-glow-hover:hover {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.4);
+    border-color: hsl(var(--primary) / 0.6);
+    transition: all 0.3s ease;
   }
 
   /* Magical text effects */

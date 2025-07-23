@@ -9,6 +9,7 @@ import { SettingsPage } from "@/components/SettingsPage";
 import { DashboardPage } from "@/components/DashboardPage";
 import { ProfilePage } from "@/components/ProfilePage";
 import { SettingsProvider } from "@/hooks/useSettings";
+import { DocumentProvider } from "@/hooks/useDocumentUpload";
 import heroImage from "@/assets/hero-library.jpg";
 import wandImage from "@/assets/magic-wand.png";
 const Index = () => {
@@ -92,7 +93,7 @@ const Index = () => {
         
         <div className="relative max-w-6xl mx-auto text-center space-y-8 w-full">
           <div className="flex justify-center items-center gap-4 mb-6">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl font-magical text-magical leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-harry-potter text-magical leading-tight">
               BookWand
             </h1>
             <img 
@@ -162,10 +163,12 @@ const Index = () => {
       </>;
   };
   return <SettingsProvider>
-      <div className="min-h-screen w-full overflow-x-hidden">
-        <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
-        {renderPageContent()}
-      </div>
+      <DocumentProvider>
+        <div className="min-h-screen w-full overflow-x-hidden">
+          <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+          {renderPageContent()}
+        </div>
+      </DocumentProvider>
     </SettingsProvider>;
 };
 export default Index;

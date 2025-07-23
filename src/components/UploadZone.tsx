@@ -3,6 +3,7 @@ import { Upload, FileText, Sparkles } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { MagicalButton } from "./MagicalButton";
 import { cn } from "@/lib/utils";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
 
 interface UploadZoneProps {
   onFileUpload: (file: File) => void;
@@ -11,6 +12,7 @@ interface UploadZoneProps {
 
 export function UploadZone({ onFileUpload, className }: UploadZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
+  const { addDocument } = useDocumentUpload();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -30,6 +32,13 @@ export function UploadZone({ onFileUpload, className }: UploadZoneProps) {
     const file = files[0];
     
     if (file && (file.type === "application/pdf" || file.type === "text/plain" || file.name.endsWith('.epub'))) {
+      // Add to document tracking
+      addDocument({
+        title: file.name,
+        size: file.size,
+        type: file.type,
+        isBookmarked: false
+      });
       onFileUpload(file);
     }
   }, [onFileUpload]);
@@ -37,9 +46,16 @@ export function UploadZone({ onFileUpload, className }: UploadZoneProps) {
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Add to document tracking
+      addDocument({
+        title: file.name,
+        size: file.size,
+        type: file.type,
+        isBookmarked: false
+      });
       onFileUpload(file);
     }
-  }, [onFileUpload]);
+  }, [onFileUpload, addDocument]);
 
   return (
     <MagicalCard

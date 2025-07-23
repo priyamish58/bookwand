@@ -1,20 +1,84 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { User, Mail, BookOpen, Settings, Camera, Edit2 } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { MagicalButton } from "./MagicalButton";
+import { useDocumentUpload } from "@/hooks/useDocumentUpload";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfilePageProps {
   onNavigate?: (page: string) => void;
 }
 
 export function ProfilePage({ onNavigate }: ProfilePageProps) {
-  const [user] = useState({
+  const { documentCount } = useDocumentUpload();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [user, setUser] = useState({
     username: "WizardReader",
     email: "wizard@bookwand.magic",
     profilePicture: "/placeholder.svg",
-    totalUploads: 0,
     joinDate: "2024-01-22"
   });
+
+  const handleCameraClick = async () => {
+    try {
+      // First try to access camera
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        
+        // Create video element to capture frame
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.play();
+        
+        video.onloadedmetadata = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          
+          setTimeout(() => {
+            if (ctx) {
+              ctx.drawImage(video, 0, 0);
+              const imageData = canvas.toDataURL('image/png');
+              setUser(prev => ({ ...prev, profilePicture: imageData }));
+              
+              // Stop camera stream
+              stream.getTracks().forEach(track => track.stop());
+              
+              toast({
+                title: "Profile picture captured!",
+                description: "Your new profile picture has been saved.",
+              });
+            }
+          }, 3000); // Give user 3 seconds to pose
+        };
+      } else {
+        // Fallback to file input
+        fileInputRef.current?.click();
+      }
+    } catch (error) {
+      // If camera access denied, fallback to file input
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setUser(prev => ({ ...prev, profilePicture: e.target!.result as string }));
+          toast({
+            title: "Profile picture updated!",
+            description: "Your new profile picture has been saved.",
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div className="pt-20 px-4 min-h-screen">
@@ -36,12 +100,30 @@ export function ProfilePage({ onNavigate }: ProfilePageProps) {
           <MagicalCard variant="magical" className="md:col-span-2 p-8">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
-                  <User className="w-12 h-12 text-primary" />
+                <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+                  {user.profilePicture === "/placeholder.svg" ? (
+                    <User className="w-12 h-12 text-primary" />
+                  ) : (
+                    <img 
+                      src={user.profilePicture} 
+                      alt="Profile" 
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
-                <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors">
+                <button 
+                  onClick={handleCameraClick}
+                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary rounded-full flex items-center justify-center hover:bg-primary/90 transition-colors magical-glow-hover"
+                >
                   <Camera className="w-4 h-4 text-primary-foreground" />
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
               </div>
               
               <div className="flex-1 text-center sm:text-left">
@@ -70,7 +152,7 @@ export function ProfilePage({ onNavigate }: ProfilePageProps) {
             <div className="text-center">
               <BookOpen className="w-8 h-8 text-primary mx-auto mb-3" />
               <div className="text-2xl font-magical text-foreground mb-1">
-                {user.totalUploads}
+                {documentCount}
               </div>
               <div className="text-sm text-muted-foreground">
                 Documents Uploaded
