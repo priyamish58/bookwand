@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { FileText, Sparkles, Volume2, Brain, ArrowLeft, Scroll } from "lucide-react";
+import { FileText, Sparkles, Volume2, Brain, ArrowLeft, Scroll, Play, Square } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { MagicalButton } from "./MagicalButton";
 import { MagicalProgress } from "./MagicalProgress";
 import { parseFile, getFilePreview } from "@/utils/fileParser";
 import { useSettings } from "@/hooks/useSettings";
+import { createOpenAIService } from "@/utils/openai";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentProcessorProps {
   file: File;
@@ -19,7 +21,10 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   const [progress, setProgress] = useState(0);
   const [summary, setSummary] = useState("");
   const [currentStep, setCurrentStep] = useState<"loading" | "display" | "processing" | "results">("loading");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const { settings } = useSettings();
+  const { toast } = useToast();
 
   // Auto-parse file content on component mount
   useEffect(() => {
@@ -42,35 +47,123 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   }, [file]);
 
   const handleSummarize = async () => {
+    if (!settings.openaiApiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please add your OpenAI API key in Settings to use AI features.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setCurrentStep("processing");
     setIsProcessing(true);
     setProgress(0);
 
-    // Simulate AI processing
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      setProgress(i);
+    try {
+      // Simulate progress
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
+
+      const openaiService = createOpenAIService(settings.openaiApiKey);
+      const aiSummary = await openaiService.summarizeDocument(documentText, documentName);
+      
+      clearInterval(progressInterval);
+      setProgress(100);
+      
+      setSummary(aiSummary);
+      setIsProcessing(false);
+      setCurrentStep("results");
+      
+      toast({
+        title: "Summary Complete!",
+        description: "Your document has been magically summarized.",
+      });
+    } catch (error) {
+      setIsProcessing(false);
+      setCurrentStep("display");
+      toast({
+        title: "Summarization Failed",
+        description: error instanceof Error ? error.message : "Failed to summarize document",
+        variant: "destructive"
+      });
     }
-
-    // Mock summary
-    setSummary(`✨ Magical Summary of "${documentName}":
-
-This enchanted document contains valuable knowledge about ${documentName.toLowerCase()}. The content has been carefully analyzed by our AI wizards and transformed into digestible insights.
-
-Key magical discoveries:
-• Important concepts and themes have been identified
-• Critical information has been highlighted
-• The essence of the document has been captured
-
-Ready for your next magical adventure in learning!`);
-
-    setIsProcessing(false);
-    setCurrentStep("results");
   };
 
-  const handleReadDocument = () => {
-    // TODO: Implement reading mode
-    console.log("Reading document:", documentName);
+  const handleTextToSpeech = async (text: string) => {
+    if (!settings.openaiApiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please add your OpenAI API key in Settings to use voice features.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      if (isPlaying && currentAudio) {
+        currentAudio.pause();
+        setIsPlaying(false);
+        setCurrentAudio(null);
+        return;
+      }
+
+      const openaiService = createOpenAIService(settings.openaiApiKey);
+      const audioData = await openaiService.textToSpeech(text, settings.selectedVoice);
+      
+      const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+        setCurrentAudio(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      setCurrentAudio(audio);
+      setIsPlaying(true);
+      await audio.play();
+      
+      toast({
+        title: "Now Playing",
+        description: `${settings.selectedVoice} is reading your text.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Speech Failed",
+        description: error instanceof Error ? error.message : "Failed to generate speech",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleWordWizard = async (word: string) => {
+    if (!settings.openaiApiKey) {
+      toast({
+        title: "API Key Required",
+        description: "Please add your OpenAI API key in Settings to use Word Wizard.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const openaiService = createOpenAIService(settings.openaiApiKey);
+      const explanation = await openaiService.explainWord(word, documentText);
+      
+      toast({
+        title: `Word Wizard: ${word}`,
+        description: explanation.slice(0, 100) + "...",
+      });
+    } catch (error) {
+      toast({
+        title: "Word Wizard Failed",
+        description: error instanceof Error ? error.message : "Failed to explain word",
+        variant: "destructive"
+      });
+    }
   };
 
   if (currentStep === "loading") {
@@ -143,8 +236,12 @@ Ready for your next magical adventure in learning!`);
                 {summary}
               </pre>
             </div>
-            <MagicalButton className="w-full">
-              Read the Summarization
+            <MagicalButton 
+              className="w-full"
+              onClick={() => handleTextToSpeech(summary)}
+            >
+              {isPlaying ? <Square className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+              {isPlaying ? 'Stop Reading' : 'Read Summary Aloud'}
             </MagicalButton>
           </MagicalCard>
 
@@ -159,15 +256,19 @@ Ready for your next magical adventure in learning!`);
               <MagicalButton 
                 variant="magical" 
                 className="w-full"
-                onClick={handleReadDocument}
+                onClick={() => handleTextToSpeech(documentText.slice(0, 2000))}
               >
-                <FileText className="w-4 h-4 mr-2" />
-                Read The Document
+                {isPlaying ? <Square className="w-4 h-4 mr-2" /> : <Volume2 className="w-4 h-4 mr-2" />}
+                {isPlaying ? 'Stop Reading' : 'Read Document Aloud'}
               </MagicalButton>
               
-              <MagicalButton variant="outline" className="w-full">
+              <MagicalButton 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handleTextToSpeech(summary)}
+              >
                 <Volume2 className="w-4 h-4 mr-2" />
-                Listen with Character Voice
+                Listen to Summary
               </MagicalButton>
               
               <MagicalButton variant="scroll" className="w-full">
@@ -237,12 +338,30 @@ Ready for your next magical adventure in learning!`);
                 Summarize with AI
               </MagicalButton>
               
-              <MagicalButton variant="outline" className="w-full">
-                <Volume2 className="w-4 h-4 mr-2" />
-                Listen ({settings.selectedVoice})
+              <MagicalButton 
+                variant="outline" 
+                className="w-full"
+                onClick={() => handleTextToSpeech(documentText.slice(0, 2000))}
+              >
+                {isPlaying ? <Square className="w-4 h-4 mr-2" /> : <Volume2 className="w-4 h-4 mr-2" />}
+                {isPlaying ? 'Stop' : 'Listen'} ({settings.selectedVoice})
               </MagicalButton>
               
-              <MagicalButton variant="scroll" className="w-full">
+              <MagicalButton 
+                variant="scroll" 
+                className="w-full"
+                onClick={() => {
+                  const selectedText = window.getSelection()?.toString().trim();
+                  if (selectedText) {
+                    handleWordWizard(selectedText);
+                  } else {
+                    toast({
+                      title: "Word Wizard",
+                      description: "Please select a word or phrase to explain.",
+                    });
+                  }
+                }}
+              >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Word Wizard
               </MagicalButton>

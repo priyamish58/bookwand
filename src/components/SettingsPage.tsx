@@ -1,7 +1,9 @@
-import { Settings, Moon, Sun, Brain, Eye, Volume2, Accessibility } from "lucide-react";
+import { Settings, Moon, Sun, Brain, Eye, Volume2, Accessibility, Key } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { Switch } from "./ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import { useSettings } from "@/hooks/useSettings";
 
 const voices = [
@@ -121,6 +123,49 @@ export function SettingsPage() {
               <p className="text-sm text-muted-foreground">
                 Choose which magical character will narrate your documents with AI-powered voice synthesis
               </p>
+            </div>
+          </MagicalCard>
+
+          {/* OpenAI API Settings */}
+          <MagicalCard variant="magical" className="p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <Key className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-magical text-foreground">AI Integration</h2>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="openai-key" className="text-sm font-medium text-foreground">
+                  OpenAI API Key
+                </Label>
+                <Input
+                  id="openai-key"
+                  type="password"
+                  placeholder="sk-..."
+                  value={settings.openaiApiKey}
+                  onChange={(e) => updateSetting('openaiApiKey', e.target.value)}
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Required for AI summarization, word explanations, and text-to-speech. Your API key is stored locally in your browser.
+                </p>
+              </div>
+              
+              {!settings.openaiApiKey && (
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    <strong>Need an API key?</strong> Get one from{' '}
+                    <a 
+                      href="https://platform.openai.com/api-keys" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="underline hover:no-underline"
+                    >
+                      OpenAI Platform
+                    </a>
+                  </p>
+                </div>
+              )}
             </div>
           </MagicalCard>
 
