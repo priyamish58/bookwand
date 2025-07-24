@@ -140,9 +140,11 @@ export class OpenAIService {
   }
 }
 
-export const createOpenAIService = (apiKey: string) => {
-  if (!apiKey) {
+export const createOpenAIService = (apiKey?: string) => {
+  // Use provided API key or the hardcoded one
+  const key = apiKey || 'YOUR_OPENAI_API_KEY_HERE';
+  if (!key || key === 'YOUR_OPENAI_API_KEY_HERE') {
     throw new Error('OpenAI API key is required');
   }
-  return new OpenAIService(apiKey);
+  return new OpenAIService(key);
 };

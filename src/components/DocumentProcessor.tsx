@@ -47,15 +47,6 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   }, [file]);
 
   const handleSummarize = async () => {
-    if (!settings.openaiApiKey) {
-      toast({
-        title: "API Key Required",
-        description: "Please add your OpenAI API key in Settings to use AI features.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setCurrentStep("processing");
     setIsProcessing(true);
     setProgress(0);
@@ -66,7 +57,7 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
         setProgress(prev => Math.min(prev + 10, 90));
       }, 200);
 
-      const openaiService = createOpenAIService(settings.openaiApiKey);
+      const openaiService = createOpenAIService();
       const aiSummary = await openaiService.summarizeDocument(documentText, documentName);
       
       clearInterval(progressInterval);
@@ -92,15 +83,6 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   };
 
   const handleTextToSpeech = async (text: string) => {
-    if (!settings.openaiApiKey) {
-      toast({
-        title: "API Key Required",
-        description: "Please add your OpenAI API key in Settings to use voice features.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
       if (isPlaying && currentAudio) {
         currentAudio.pause();
@@ -109,7 +91,7 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
         return;
       }
 
-      const openaiService = createOpenAIService(settings.openaiApiKey);
+      const openaiService = createOpenAIService();
       const audioData = await openaiService.textToSpeech(text, settings.selectedVoice);
       
       const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
@@ -140,17 +122,8 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   };
 
   const handleWordWizard = async (word: string) => {
-    if (!settings.openaiApiKey) {
-      toast({
-        title: "API Key Required",
-        description: "Please add your OpenAI API key in Settings to use Word Wizard.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     try {
-      const openaiService = createOpenAIService(settings.openaiApiKey);
+      const openaiService = createOpenAIService();
       const explanation = await openaiService.explainWord(word, documentText);
       
       toast({

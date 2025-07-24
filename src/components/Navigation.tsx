@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, User, Settings, BookOpen, Wand2 } from "lucide-react";
+import { Menu, X, User, Settings, BookOpen, Upload } from "lucide-react";
 import { MagicalButton } from "./MagicalButton";
 import { cn } from "@/lib/utils";
 import wandImage from "@/assets/magic-wand.png";
@@ -13,6 +13,7 @@ export function Navigation({ currentPage = "home", onNavigate }: NavigationProps
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
+    { id: "upload", label: "Upload", icon: Upload },
     { id: "profile", label: "Profile", icon: User },
     { id: "settings", label: "Settings", icon: Settings },
     { id: "dashboard", label: "Dashboard", icon: BookOpen },
@@ -37,14 +38,6 @@ export function Navigation({ currentPage = "home", onNavigate }: NavigationProps
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
-          <MagicalButton 
-            variant="outline" 
-            size="sm"
-            onClick={() => handleNavigate("upload")}
-            className="mr-4"
-          >
-            Upload Document
-          </MagicalButton>
           {menuItems.map((item) => (
             <button
               key={item.id}

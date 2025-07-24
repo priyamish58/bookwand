@@ -5,7 +5,6 @@ interface Settings {
   isADHDFocus: boolean;
   isDarkMode: boolean;
   selectedVoice: string;
-  openaiApiKey: string;
 }
 
 interface SettingsContextType {
@@ -18,8 +17,7 @@ const defaultSettings: Settings = {
   isDyslexiaMode: false,
   isADHDFocus: false,
   isDarkMode: true,
-  selectedVoice: 'hermione',
-  openaiApiKey: ''
+  selectedVoice: 'hermione'
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
