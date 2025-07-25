@@ -13,7 +13,7 @@ const MagicalButton = forwardRef<HTMLButtonElement, MagicalButtonProps>(
     const baseClasses = "relative overflow-hidden font-semibold transition-all duration-300 ease-out";
     
     const variants = {
-      magical: "btn-magical hover:transform hover:scale-105",
+      magical: "bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-900 font-semibold rounded-lg border-2 border-amber-300 hover:from-amber-300 hover:to-yellow-400 hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300",
       scroll: "bg-magical-scroll-bg border-2 border-magical-scroll-border text-foreground magical-glow-hover",
       outline: "border-2 border-primary text-primary magical-glow-hover"
     };

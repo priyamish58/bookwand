@@ -91,8 +91,8 @@ const Index = () => {
         }} />
         <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background" />
         
-        <div className="relative max-w-6xl mx-auto text-center space-y-8 w-full">
-          <div className="flex justify-center items-center gap-4 mb-6">
+        <div className="relative max-w-6xl mx-auto text-center w-full">
+          <div className="flex justify-center items-center gap-4 mb-12">
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-harry-potter text-magical leading-tight">
               BookWand
             </h1>
@@ -103,7 +103,7 @@ const Index = () => {
             />
           </div>
           
-          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-body px-4">
+          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto font-body px-4 mb-16">
             Transform your reading experience with magical AI-powered summaries, 
             character voices, and accessibility features that make every document enchanting.
           </p>
