@@ -25,7 +25,9 @@ interface ElevenLabsResponse {
   audio: ArrayBuffer;
 }
 
-// Note: API key should be provided by the user
+// Debug environment variable loading
+console.log('ElevenLabs API Key from env:', import.meta.env.VITE_ELEVENLABS_API_KEY ? 'Found' : 'Not found');
+
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
 /**

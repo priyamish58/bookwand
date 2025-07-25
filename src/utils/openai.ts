@@ -141,12 +141,15 @@ export class OpenAIService {
 }
 
 export const createOpenAIService = (apiKey?: string) => {
-  // Use provided API key or the hardcoded one
+  // Debug environment variable loading
+  console.log('OpenAI API Key from env:', import.meta.env.VITE_OPENAI_API_KEY ? 'Found' : 'Not found');
+  
+  // Use provided API key or the one from environment
   const key = apiKey || import.meta.env.VITE_OPENAI_API_KEY;
    // Add this line to debug
   console.log("OpenAI Key:", import.meta.env.VITE_OPENAI_API_KEY);
   if (!key || key === 'YOUR_OPENAI_API_KEY_HERE') {
-    throw new Error('OpenAI API key is required');
+    throw new Error('❌ OpenAI API key not found. Please check your .env file contains VITE_OPENAI_API_KEY');
   }
   return new OpenAIService(key);
 };
