@@ -26,7 +26,7 @@ interface ElevenLabsResponse {
 }
 
 // Note: API key should be provided by the user
-const ELEVENLABS_API_KEY = 'your-api-key-here'; // This will be replaced with actual key
+const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
 
 /**
  * Converts text to speech using ElevenLabs API with character voices
@@ -44,9 +44,9 @@ export async function textToSpeech({
     throw new Error(`Voice not found for character: ${character}`);
   }
 
-  if (!ELEVENLABS_API_KEY || ELEVENLABS_API_KEY === 'your-api-key-here') {
-    throw new Error('ElevenLabs API key not configured');
-  }
+  if (!ELEVENLABS_API_KEY) {
+  throw new Error('❌ ElevenLabs API key not found. Please check your .env file.');
+}
 
   try {
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {

@@ -142,7 +142,7 @@ export class OpenAIService {
 
 export const createOpenAIService = (apiKey?: string) => {
   // Use provided API key or the hardcoded one
-  const key = apiKey || 'YOUR_OPENAI_API_KEY_HERE';
+  const key = apiKey || import.meta.env.VITE_OPENAI_API_KEY;
   if (!key || key === 'YOUR_OPENAI_API_KEY_HERE') {
     throw new Error('OpenAI API key is required');
   }
