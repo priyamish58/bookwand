@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, Sparkles, Volume2, Brain, ArrowLeft, Scroll, Play, Square } from "lucide-react";
+import { FileText, Sparkles, Volume2, Brain, ArrowLeft, Scroll, Play, Square, X } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { MagicalButton } from "./MagicalButton";
 import { MagicalProgress } from "./MagicalProgress";
@@ -7,6 +7,7 @@ import { parseFile, getFilePreview } from "@/utils/fileParser";
 import { useSettings } from "@/hooks/useSettings";
 import { createOpenAIService } from "@/utils/openai";
 import { useToast } from "@/hooks/use-toast";
+import { checkNetworkConnectivity } from "@/utils/networkUtils";
 
 interface DocumentProcessorProps {
   file: File;
@@ -20,9 +21,10 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [summary, setSummary] = useState("");
-  const [currentStep, setCurrentStep] = useState<"loading" | "display" | "processing" | "results">("loading");
+  const [currentStep, setCurrentStep] = useState<"loading" | "display" | "processing" | "results" | "error">("loading");
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const { settings } = useSettings();
   const { toast } = useToast();
 
@@ -52,6 +54,12 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
     setProgress(0);
 
     try {
+      // Check network connectivity first
+      const isConnected = await checkNetworkConnectivity();
+      if (!isConnected) {
+        throw new Error("Network connection unavailable. Please check your internet connection and try again.");
+      }
+
       // Simulate progress
       const progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 10, 90));
@@ -73,12 +81,21 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
       });
     } catch (error) {
       setIsProcessing(false);
-      setCurrentStep("display");
-      toast({
-        title: "Summarization Failed",
-        description: error instanceof Error ? error.message : "Failed to summarize document",
-        variant: "destructive"
-      });
+      
+      // Set error message and switch to error state if it's a network error
+      const errorMsg = error instanceof Error ? error.message : "Failed to summarize document";
+      
+      if (errorMsg.includes("network") || errorMsg.includes("connection")) {
+        setErrorMessage(errorMsg);
+        setCurrentStep("error");
+      } else {
+        setCurrentStep("display");
+        toast({
+          title: "Summarization Failed",
+          description: errorMsg,
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -89,6 +106,12 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
         setIsPlaying(false);
         setCurrentAudio(null);
         return;
+      }
+
+      // Check network connectivity first
+      const isConnected = await checkNetworkConnectivity();
+      if (!isConnected) {
+        throw new Error("Network connection unavailable. Please check your internet connection and try again.");
       }
 
       const openaiService = createOpenAIService();
@@ -113,9 +136,11 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
         description: `${settings.selectedVoice} is reading your text.`,
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to generate speech";
+      
       toast({
         title: "Speech Failed",
-        description: error instanceof Error ? error.message : "Failed to generate speech",
+        description: errorMsg,
         variant: "destructive"
       });
     }
@@ -123,6 +148,12 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
 
   const handleWordWizard = async (word: string) => {
     try {
+      // Check network connectivity first
+      const isConnected = await checkNetworkConnectivity();
+      if (!isConnected) {
+        throw new Error("Network connection unavailable. Please check your internet connection and try again.");
+      }
+
       const openaiService = createOpenAIService();
       const explanation = await openaiService.explainWord(word, documentText);
       
@@ -131,9 +162,11 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
         description: explanation.slice(0, 100) + "...",
       });
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Failed to explain word";
+      
       toast({
         title: "Word Wizard Failed",
-        description: error instanceof Error ? error.message : "Failed to explain word",
+        description: errorMsg,
         variant: "destructive"
       });
     }
@@ -181,6 +214,37 @@ export function DocumentProcessor({ file, onBack }: DocumentProcessorProps) {
               label="Enchanting your document..."
               className="max-w-md mx-auto"
             />
+          </div>
+        </MagicalCard>
+      </div>
+    );
+  }
+
+  if (currentStep === "error") {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <MagicalCard variant="parchment" className="p-8 text-center space-y-6">
+          <div className="space-y-4">
+            <div className="w-16 h-16 mx-auto bg-destructive/20 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-destructive" />
+            </div>
+            <h3 className="text-2xl font-magical text-destructive">
+              Connection Error
+            </h3>
+            <p className="text-muted-foreground">
+              {errorMessage || "Failed to connect to the magical services. Please check your internet connection."}
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+              <MagicalButton variant="outline" onClick={() => setCurrentStep("display")}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Document
+              </MagicalButton>
+              <MagicalButton onClick={handleSummarize}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Try Again
+              </MagicalButton>
+            </div>
           </div>
         </MagicalCard>
       </div>

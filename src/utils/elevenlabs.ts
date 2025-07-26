@@ -1,3 +1,11 @@
+import {
+  checkNetworkConnectivity,
+  parseApiError,
+  isNetworkError,
+  getUserFriendlyErrorMessage,
+  createProxyUrl
+} from './networkUtils';
+
 // ElevenLabs Text-to-Speech API Integration
 // Character voice mappings for magical characters
 const CHARACTER_VOICES = {
@@ -21,14 +29,156 @@ interface TextToSpeechOptions {
   model?: string;
 }
 
-interface ElevenLabsResponse {
-  audio: ArrayBuffer;
-}
-
-// Debug environment variable loading
-console.log('ElevenLabs API Key from env:', import.meta.env.VITE_ELEVENLABS_API_KEY ? 'Found' : 'Not found');
+// No need for this interface as it's not used
+// interface ElevenLabsResponse {
+//   audio: ArrayBuffer;
+// }
 
 const ELEVENLABS_API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+let useCorsProxy = false;
+
+// Global rate limiter to track API usage
+class RateLimiter {
+  private requestTimestamps: number[] = [];
+  private readonly maxRequestsPerMinute: number = 10; // Adjust based on your ElevenLabs plan
+  private readonly timeWindow: number = 60 * 1000; // 1 minute in milliseconds
+
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    // Remove timestamps older than the time window
+    this.requestTimestamps = this.requestTimestamps.filter(
+      timestamp => now - timestamp < this.timeWindow
+    );
+    
+    return this.requestTimestamps.length < this.maxRequestsPerMinute;
+  }
+
+  recordRequest(): void {
+    this.requestTimestamps.push(Date.now());
+  }
+
+  getTimeUntilNextAvailable(): number {
+    if (this.canMakeRequest()) return 0;
+    
+    const now = Date.now();
+    const oldestTimestamp = this.requestTimestamps[0];
+    return Math.max(0, this.timeWindow - (now - oldestTimestamp));
+  }
+}
+
+// Request queue to prevent concurrent requests
+class RequestQueue {
+  private queue: Array<() => Promise<any>> = [];
+  private processing: boolean = false;
+  private rateLimiter: RateLimiter;
+
+  constructor(rateLimiter: RateLimiter) {
+    this.rateLimiter = rateLimiter;
+  }
+
+  async add<T>(requestFn: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          // Wait until we can make a request according to rate limits
+          while (!this.rateLimiter.canMakeRequest()) {
+            const waitTime = this.rateLimiter.getTimeUntilNextAvailable();
+            console.log(`Rate limit reached. Waiting ${Math.ceil(waitTime/1000)} seconds before next request...`);
+            await new Promise(r => setTimeout(r, waitTime + 100)); // Add a small buffer
+          }
+          
+          // Record this request
+          this.rateLimiter.recordRequest();
+          
+          // Execute the request
+          const result = await requestFn();
+          resolve(result);
+          return result;
+        } catch (error) {
+          reject(error);
+          throw error;
+        }
+      });
+      
+      this.processQueue();
+    });
+  }
+
+  private async processQueue() {
+    if (this.processing || this.queue.length === 0) return;
+    
+    this.processing = true;
+    
+    while (this.queue.length > 0) {
+      const request = this.queue.shift()!;
+      try {
+        await request();
+      } catch (error) {
+        console.error('Error processing queued request:', error);
+      }
+    }
+    
+    this.processing = false;
+  }
+}
+
+// Initialize global instances
+const rateLimiter = new RateLimiter();
+const requestQueue = new RequestQueue(rateLimiter);
+
+/**
+ * Fetch with retry and CORS proxy fallback
+ * @param url - The URL to fetch
+ * @param options - Fetch options
+ * @param retries - Number of retries
+ * @returns Promise<Response>
+ */
+async function fetchWithRetry(url: string, options: RequestInit, retries = 5, backoffMs = 2000): Promise<Response> {
+  try {
+    // Try direct connection first
+    const response = await fetch(url, options);
+    
+    // Handle rate limiting with exponential backoff
+    if (response.status === 429 && retries > 0) {
+      const retryAfter = response.headers.get('Retry-After');
+      let waitTime = backoffMs;
+      
+      // Use Retry-After header if available
+      if (retryAfter) {
+        const retrySeconds = parseInt(retryAfter, 10);
+        if (!isNaN(retrySeconds)) {
+          waitTime = retrySeconds * 1000;
+        }
+      }
+      
+      console.log(`Rate limit exceeded. Retrying in ${waitTime/1000} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      return fetchWithRetry(url, options, retries - 1, backoffMs * 2);
+    }
+    
+    return response;
+  } catch (error) {
+    // If network error and retries left, try with CORS proxy
+    if (isNetworkError(error) && !useCorsProxy && retries > 0) {
+      console.log('Direct connection to ElevenLabs failed, trying with CORS proxy...', error);
+      useCorsProxy = true;
+      const proxyUrl = createProxyUrl(url);
+      return fetchWithRetry(proxyUrl, options, retries - 1, backoffMs);
+    }
+    throw error;
+  }
+}
+
+// Check network connectivity
+checkNetworkConnectivity()
+  .then(isConnected => {
+    if (!isConnected) {
+      console.warn('Network connectivity check failed. Internet connection may be unavailable.');
+    }
+  })
+  .catch(error => {
+    console.warn('Network connectivity check error:', error);
+  });
 
 /**
  * Converts text to speech using ElevenLabs API with character voices
@@ -47,39 +197,56 @@ export async function textToSpeech({
   }
 
   if (!ELEVENLABS_API_KEY) {
-  throw new Error('❌ ElevenLabs API key not found. Please check your .env file.');
-}
-
-  try {
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': ELEVENLABS_API_KEY,
-      },
-      body: JSON.stringify({
-        text,
-        model_id: model,
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.0,
-          use_speaker_boost: true
-        }
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`ElevenLabs API error: ${response.status} - ${errorText}`);
-    }
-
-    return await response.arrayBuffer();
-  } catch (error) {
-    console.error('Error calling ElevenLabs API:', error);
-    throw error;
+    throw new Error('❌ ElevenLabs API key not found. Please check your .env file.');
   }
+
+  // Add the request to the queue to prevent concurrent requests
+  return requestQueue.add(async () => {
+    try {
+      const url = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+      const options = {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': ELEVENLABS_API_KEY,
+        },
+        body: JSON.stringify({
+          text,
+          model_id: model,
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.0,
+            use_speaker_boost: true
+          }
+        }),
+      };
+
+      // Use fetchWithRetry to handle network issues
+      const response = await fetchWithRetry(url, options);
+
+      if (!response.ok) {
+        const errorMessage = await parseApiError(response);
+        console.error('ElevenLabs API error details:', errorMessage);
+        
+        if (response.status === 429) {
+          throw new Error(`ElevenLabs API rate limit exceeded. Please try again later or reduce the frequency of requests.`);
+        }
+        
+        throw new Error(`ElevenLabs API error: ${errorMessage}`);
+      }
+
+      return await response.arrayBuffer();
+    } catch (error) {
+      console.error('Error calling ElevenLabs API:', error);
+      const friendlyMessage = getUserFriendlyErrorMessage(
+        error,
+        'Failed to generate speech. Please check your API key and try again.'
+      );
+      throw new Error(friendlyMessage);
+    }
+  });
 }
 
 /**

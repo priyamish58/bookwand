@@ -1,8 +1,9 @@
-import { Settings, Moon, Sun, Brain, Eye, Volume2, Accessibility } from "lucide-react";
+import { Settings, Moon, Sun, Brain, Eye, Volume2, Accessibility, Wifi } from "lucide-react";
 import { MagicalCard } from "./MagicalCard";
 import { Switch } from "./ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useSettings } from "@/hooks/useSettings";
+import { ApiConnectivityTest } from "./ApiConnectivityTest";
 
 const voices = [
   { id: 'hermione', name: 'Hermione Granger', description: 'Bright and intelligent' },
@@ -134,6 +135,22 @@ export function SettingsPage() {
             <div className="text-center text-muted-foreground">
               <p>Additional reading preferences and AI settings will appear here</p>
               <p className="text-sm mt-2">Voice speed, summary styles, and more coming soon...</p>
+            </div>
+          </MagicalCard>
+
+          {/* API Connectivity Test */}
+          <MagicalCard variant="magical" className="p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <Wifi className="w-6 h-6 text-primary" />
+              <h2 className="text-xl font-magical text-foreground">API Connectivity</h2>
+            </div>
+            
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                If you're experiencing issues with AI features, use this tool to test your connection to our magical services.
+              </p>
+              
+              <ApiConnectivityTest />
             </div>
           </MagicalCard>
         </div>

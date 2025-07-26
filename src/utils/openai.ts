@@ -1,3 +1,11 @@
+import {
+  checkNetworkConnectivity,
+  parseApiError,
+  isNetworkError,
+  getUserFriendlyErrorMessage,
+  createProxyUrl
+} from './networkUtils';
+
 interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -18,9 +26,35 @@ interface OpenAITTSResponse {
 export class OpenAIService {
   private apiKey: string;
   private baseUrl = 'https://api.openai.com/v1';
+  private useCorsProxy = false;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
+  }
+
+  private async fetchWithRetry(url: string, options: RequestInit, retries = 3, backoffMs = 1000): Promise<Response> {
+    try {
+      // Try direct connection first
+      const response = await fetch(url, options);
+      
+      // Handle rate limiting with exponential backoff
+      if (response.status === 429 && retries > 0) {
+        console.log(`Rate limit exceeded. Retrying in ${backoffMs/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+        return this.fetchWithRetry(url, options, retries - 1, backoffMs * 2);
+      }
+      
+      return response;
+    } catch (error) {
+      // If network error and retries left, try with CORS proxy
+      if (isNetworkError(error) && !this.useCorsProxy && retries > 0) {
+        console.log('Direct connection failed, trying with CORS proxy...', error);
+        this.useCorsProxy = true;
+        const proxyUrl = createProxyUrl(url);
+        return this.fetchWithRetry(proxyUrl, options, retries - 1, backoffMs);
+      }
+      throw error;
+    }
   }
 
   async summarizeDocument(content: string, documentName: string): Promise<string> {
@@ -36,7 +70,10 @@ export class OpenAIService {
         }
       ];
 
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const url = `${this.baseUrl}/chat/completions`;
+      console.log("API Key being used:", this.apiKey);
+
+      const options = {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -48,17 +85,26 @@ export class OpenAIService {
           max_tokens: 800,
           temperature: 0.7,
         }),
-      });
+      };
+
+      // Use fetchWithRetry to handle network issues
+      const response = await this.fetchWithRetry(url, options);
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        const errorMessage = await parseApiError(response);
+        console.error('OpenAI API error details:', errorMessage);
+        throw new Error(`OpenAI API error: ${errorMessage}`);
       }
 
       const data: OpenAIResponse = await response.json();
       return data.choices[0]?.message?.content || 'Unable to generate summary.';
     } catch (error) {
       console.error('Error summarizing document:', error);
-      throw new Error('Failed to summarize document. Please check your API key and try again.');
+      const friendlyMessage = getUserFriendlyErrorMessage(
+        error,
+        'Failed to summarize document. Please check your API key and try again.'
+      );
+      throw new Error(friendlyMessage);
     }
   }
 
@@ -75,7 +121,8 @@ export class OpenAIService {
         }
       ];
 
-      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      const url = `${this.baseUrl}/chat/completions`;
+      const options = {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -87,17 +134,26 @@ export class OpenAIService {
           max_tokens: 300,
           temperature: 0.7,
         }),
-      });
+      };
+
+      // Use fetchWithRetry to handle network issues
+      const response = await this.fetchWithRetry(url, options);
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        const errorMessage = await parseApiError(response);
+        console.error('OpenAI API error details:', errorMessage);
+        throw new Error(`OpenAI API error: ${errorMessage}`);
       }
 
       const data: OpenAIResponse = await response.json();
       return data.choices[0]?.message?.content || 'Unable to explain word.';
     } catch (error) {
       console.error('Error explaining word:', error);
-      throw new Error('Failed to explain word. Please check your API key and try again.');
+      const friendlyMessage = getUserFriendlyErrorMessage(
+        error,
+        'Failed to explain word. Please check your API key and try again.'
+      );
+      throw new Error(friendlyMessage);
     }
   }
 
@@ -114,7 +170,8 @@ export class OpenAIService {
 
       const selectedVoice = voiceMap[voice] || voiceMap['default'];
 
-      const response = await fetch(`${this.baseUrl}/audio/speech`, {
+      const url = `${this.baseUrl}/audio/speech`;
+      const options = {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -126,30 +183,47 @@ export class OpenAIService {
           voice: selectedVoice,
           speed: 1.0
         }),
-      });
+      };
+
+      // Use fetchWithRetry to handle network issues
+      const response = await this.fetchWithRetry(url, options);
 
       if (!response.ok) {
-        throw new Error(`OpenAI TTS API error: ${response.status}`);
+        const errorMessage = await parseApiError(response);
+        console.error('OpenAI TTS API error details:', errorMessage);
+        throw new Error(`OpenAI TTS API error: ${errorMessage}`);
       }
 
       return await response.arrayBuffer();
     } catch (error) {
       console.error('Error generating speech:', error);
-      throw new Error('Failed to generate speech. Please check your API key and try again.');
+      const friendlyMessage = getUserFriendlyErrorMessage(
+        error,
+        'Failed to generate speech. Please check your API key and try again.'
+      );
+      throw new Error(friendlyMessage);
     }
   }
 }
 
 export const createOpenAIService = (apiKey?: string) => {
-  // Debug environment variable loading
-  console.log('OpenAI API Key from env:', import.meta.env.VITE_OPENAI_API_KEY ? 'Found' : 'Not found');
-  
   // Use provided API key or the one from environment
   const key = apiKey || import.meta.env.VITE_OPENAI_API_KEY;
-   // Add this line to debug
-  console.log("OpenAI Key:", import.meta.env.VITE_OPENAI_API_KEY);
+  
   if (!key || key === 'YOUR_OPENAI_API_KEY_HERE') {
     throw new Error('❌ OpenAI API key not found. Please check your .env file contains VITE_OPENAI_API_KEY');
   }
+  
+  // Check network connectivity
+  checkNetworkConnectivity()
+    .then(isConnected => {
+      if (!isConnected) {
+        console.warn('Network connectivity check failed. Internet connection may be unavailable.');
+      }
+    })
+    .catch(error => {
+      console.warn('Network connectivity check error:', error);
+    });
+  
   return new OpenAIService(key);
 };
